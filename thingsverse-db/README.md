@@ -11,3 +11,6 @@ setupDatabase(config).then(db => {
     ...
 }).catch(err => console.error(err))
 ```
+
+## Entities
+![Entities](Entities.png)
