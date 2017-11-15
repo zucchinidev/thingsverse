@@ -2,34 +2,17 @@
 
 const Sequelize = require('sequelize')
 const setupDatabase = require('../lib/db')
-module.exports = function setupAgentModel(config) {
+module.exports = function setupMetricModel (config) {
   const sequelize = setupDatabase(config)
 
-  return sequelize.define('agent', {
-    uuid: {
+  return sequelize.define('metric', {
+    type: {
       type: Sequelize.STRING,
       allowNull: false
     },
-    username: {
-      type: Sequelize.STRING,
+    value: {
+      type: Sequelize.TEXT,
       allowNull: false
-    },
-    name: {
-      type: Sequelize.STRING,
-      allowNull: false
-    },
-    hostname: {
-      type: Sequelize.STRING,
-      allowNull: false
-    },
-    pid: {
-      type: Sequelize.STRING,
-      allowNull: false
-    },
-    connected: {
-      type: Sequelize.BOOLEAN,
-      allowNull: false,
-      defaultValue: false
-    },
+    }
   })
 }
