@@ -1,0 +1,22 @@
+{
+  "name": "thingsverse",
+  "version": "0.0.1",
+  "description": "A simple IoT Platform - DB Module",
+  "main": "index.js",
+  "scripts": {
+    "lint": "standard"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zucchinidev/thingsverse.git"
+  },
+  "author": "Andrea Zucchini <azga84@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zucchinidev/thingsverse/issues"
+  },
+  "homepage": "https://github.com/zucchinidev/thingsverse#readme",
+  "devDependencies": {
+    "standard": "^10.0.3"
+  }
+}
