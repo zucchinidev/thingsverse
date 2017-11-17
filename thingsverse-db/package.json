@@ -6,7 +6,7 @@
   "scripts": {
     "lint": "standard",
     "setup": "DEBUG=thingsverse:* node setup.js",
-    "test": "DEBUG=thingsverse:* ava test/ --verbose"
+    "test": "DEBUG=thingsverse:* nyc --reporter=lcov ava test/ --verbose"
   },
   "repository": {
     "type": "git",
@@ -20,6 +20,7 @@
   "homepage": "https://github.com/zucchinidev/thingsverse#readme",
   "devDependencies": {
     "ava": "^0.23.0",
+    "nyc": "^11.3.0",
     "standard": "^10.0.3"
   },
   "dependencies": {

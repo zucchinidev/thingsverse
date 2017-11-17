@@ -1,2 +1,4 @@
 .idea
 thingsverse-db/node_modules
+thingsverse-db/coverage
+thingsverse-db/.nyc_output
