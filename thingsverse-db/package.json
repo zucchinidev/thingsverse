@@ -32,7 +32,7 @@
     "inquirer": "^4.0.0",
     "pg": "^7.4.0",
     "pg-hstore": "^2.3.2",
-    "sequelize": "^4.22.6",
+    "sequelize": "^4.22.9",
     "sqlite3": "^3.1.13"
   }
 }
