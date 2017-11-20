@@ -7,7 +7,7 @@ const metric = {
   value: '{data: "fakeData"}',
   createdAt: new Date(),
   UpdatedAt: new Date(),
-  agentId: agentFixture.first.id
+  agentId: agentFixture.single.id
 }
 
 const metrics = [

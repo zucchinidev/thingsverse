@@ -6,7 +6,7 @@ const metricFixture = require('./fixtures/metric')
 let sandbox = null
 let db = null
 let metricByTypeAgentId = null
-const agentUuid = agentFixture.first.uuid
+const agentUuid = agentFixture.single.uuid
 
 const config = {
   logging: () => {}
