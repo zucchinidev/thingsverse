@@ -9,7 +9,7 @@ const agent = {
   pid: 0,
   connected: true,
   createdAt: new Date(),
-  UpdatedAt: new Date()
+  updatedAt: new Date()
 }
 
 const agents = [

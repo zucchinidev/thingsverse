@@ -6,7 +6,7 @@ const metric = {
   type: 'a',
   value: '{data: "fakeData"}',
   createdAt: new Date(),
-  UpdatedAt: new Date(),
+  updatedAt: new Date(),
   agentId: agentFixture.single.id
 }
 
