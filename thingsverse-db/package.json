@@ -1,5 +1,5 @@
 {
-  "name": "thingsverse",
+  "name": "thingsverse-db",
   "version": "0.0.1",
   "description": "A simple IoT Platform - DB Module",
   "private": true,
