@@ -1,0 +1,33 @@
+{
+  "name": "thingsverse-mqtt",
+  "version": "0.0.1",
+  "description": "A Simple IoT Platform - MQTT Server",
+  "private": true,
+  "main": "server.js",
+  "scripts": {
+    "lint": "standard",
+    "start": "NODE_ENV=production node server.js",
+    "start-dev": "DEBUG=thingsverse:* nodemon server.js",
+    "test": "DEBUG=thingsverse:* nyc --reporter=lcov ava test/ --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zucchinidev/thingsverse.git"
+  },
+  "author": "Andrea Zucchini <azga84@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zucchinidev/thingsverse/issues"
+  },
+  "homepage": "https://github.com/zucchinidev/thingsverse#readme",
+  "devDependencies": {
+    "nodemon": "^1.12.1",
+    "standard": "^10.0.3"
+  },
+  "dependencies": {
+    "chalk": "^2.3.0",
+    "debug": "^3.1.0",
+    "mosca": "^2.7.0",
+    "redis": "^2.8.0"
+  }
+}
