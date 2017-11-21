@@ -2,6 +2,7 @@
   "name": "thingsverse",
   "version": "0.0.1",
   "description": "A simple IoT Platform - DB Module",
+  "private": true,
   "main": "index.js",
   "scripts": {
     "lint": "standard",
