@@ -11,12 +11,12 @@ const backend = {
   return_buffers: true
 }
 
-const moscaSettings = {
+const mqttServerSettings = {
   port: 1883,
   backend
 }
 
-const server = new mosca.Server(moscaSettings)
+const server = new mosca.Server(mqttServerSettings)
 
 server.on('ready', () => {
   console.log(`${chalk.green('[thingsverse-mqtt]')} server is running`)
