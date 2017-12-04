@@ -14,7 +14,7 @@ class Mqtt {
 
   setEvents () {
     this.mqttModule.on('clientConnected', this.onClientConnected.bind(this))
-    this.mqttModule.on('clientDisconnected', Mqtt.onClientDisconnected.bind(this))
+    this.mqttModule.on('clientDisconnected', Mqtt.onClientDisconnected)
     this.mqttModule.on('published', this.onPublishedMessage.bind(this))
     this.mqttModule.on('error', Mqtt.handleFatalError)
     process.on('uncaughtException', Mqtt.handleFatalError)
