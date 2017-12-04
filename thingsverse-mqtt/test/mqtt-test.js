@@ -67,7 +67,19 @@ test.serial('mqtt#onPublishedMessage topic not valid', async t => {
   t.true(debug.calledWith(`Topic not valid: ${topic}`), `Should receive a message with a invalid topic ${topic}`)
 })
 
-test('mqtt#onPublishedMessage publish message with a string', async t => {
+test('mqtt#onPublishedMessage publish message', async t => {
+  const registerAgentStub = sinon.stub(mqtt, 'registerAgent')
+  const payload = { agent, metrics: [] }
+  await mqtt.onPublishedMessage({
+    topic: module.Mqtt.getTopicsAllowed().agentPublishesMessage,
+    payload: JSON.stringify(payload)
+  }, { id: '111' })
+
+  t.true(registerAgentStub.called, 'Should register an agent')
+  registerAgentStub.restore()
+})
+
+test.serial('mqtt#registerAgent register agent with the payload in string format', async t => {
   const topicsAllowed = module.Mqtt.getTopicsAllowed()
   const payload = { agent, metrics: [] }
   const args = JSON.stringify(validArgs)
@@ -77,10 +89,10 @@ test('mqtt#onPublishedMessage publish message with a string', async t => {
 
   t.is(mqtt.agents.get('111'), undefined, 'initially we do not have connected agents')
 
-  await mqtt.onPublishedMessage({
-    topic: topicsAllowed.agentPublishesMessage,
+  await mqtt.registerAgent({
+    publisher: { id: '111' },
     payload: stringPayload
-  }, { id: '111' })
+  })
 
   t.true(mqtt.agentService.createOrUpdate.calledWith(JSON.parse(args)))
   t.deepEqual(mqtt.agents.get('111'), plainObjectAgent, 'after we have a connected agent')
@@ -88,7 +100,7 @@ test('mqtt#onPublishedMessage publish message with a string', async t => {
   t.true(mqttModule.publish.calledWith(publishedMessage), 'Should post a message for the connected agent')
 })
 
-test('mqtt#onPublishedMessage publish message with a buffer', async t => {
+test.serial('mqtt#registerAgent register agent with the payload as a buffer', async t => {
   const topicsAllowed = module.Mqtt.getTopicsAllowed()
   const payload = { agent, metrics: [] }
   const args = JSON.stringify(validArgs)
@@ -98,17 +110,17 @@ test('mqtt#onPublishedMessage publish message with a buffer', async t => {
   t.is(mqtt.agents.get('111'), undefined, 'initially we do not have connected agents')
 
   const buffer = Buffer.from(stringPayload)
-  await mqtt.onPublishedMessage({
-    topic: topicsAllowed.agentPublishesMessage,
+  await mqtt.registerAgent({
+    publisher: { id: '111' },
     payload: buffer
-  }, { id: '111' })
+  })
   t.true(mqtt.agentService.createOrUpdate.calledWith(JSON.parse(args)))
   t.deepEqual(mqtt.agents.get('111'), plainObjectAgent, 'after we have a connected agent')
   t.true(mqttModule.publish.called, 'Should post a message for the connected agent')
   t.true(mqttModule.publish.calledWith(publishedMessage), 'Should post a message for the connected agent')
 })
 
-test.serial('mqtt#onPublishedMessage not valid arguments', async t => {
+test.serial('mqtt#registerAgent with not valid arguments', async t => {
   mockAgentService.createOrUpdate.withArgs(invalidArgs).returns(Promise.reject({ message: '', stack: '' })) // eslint-disable-line
 
   const handleErrorStub = sinon.stub(module.Mqtt, 'handleError')
@@ -116,7 +128,7 @@ test.serial('mqtt#onPublishedMessage not valid arguments', async t => {
   const topicsAllowed = module.Mqtt.getTopicsAllowed()
   const payload = { agent: invalidAgent }
   const args = JSON.stringify(invalidArgs)
-  await mqtt.onPublishedMessage({
+  await mqtt.registerAgent({
     topic: topicsAllowed.agentPublishesMessage,
     payload: JSON.stringify(payload)
   }, { id: '111' })
