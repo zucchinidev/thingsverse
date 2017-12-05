@@ -13,7 +13,17 @@ const invalidAgent = {
   uuid: null
 }
 
+const payload = { agent, metrics: [] }
+const stringPayload = JSON.stringify(payload)
+const publisher = { id: '111' }
+const stringAgent = JSON.stringify(agent)
+const plainObjectAgent = JSON.parse(stringAgent)
 module.exports = {
   agent,
-  invalidAgent
+  invalidAgent,
+  payload,
+  stringPayload,
+  publisher,
+  stringAgent,
+  plainObjectAgent
 }
