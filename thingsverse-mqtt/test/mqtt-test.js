@@ -3,7 +3,7 @@
 const test = require('ava')
 const sinon = require('sinon')
 const proxyquire = require('proxyquire')
-const { agent, invalidAgent, payload, stringPayload, publisher, stringAgent, plainObjectAgent } = require('./fixtures')
+const { stringPayload, publisher, stringAgent, plainObjectAgent } = require('./fixtures')
 const registerAgentsArgs = { agent: plainObjectAgent, publisher }
 
 let module
@@ -13,7 +13,6 @@ let mqtt = null
 let mockAgentService = null
 const mqttModule = {}
 
-const invalidArgs = Object.assign({}, invalidAgent, { connected: true })
 const createOrUpdateArgs = Object.assign({}, plainObjectAgent, { connected: true })
 
 test.beforeEach(async () => {
