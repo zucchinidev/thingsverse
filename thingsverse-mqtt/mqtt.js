@@ -33,28 +33,27 @@ class Mqtt {
     }
 
     if (Mqtt.isAgentPublishesMessage(topic)) {
-      await this.registerAgent({payload, publisher})
+      try {
+        debug(`Payload: ${payload}`)
+        const { agent } = parsePayload(payload)
+        await this.registerAgent({ agent, publisher })
+      } catch (err) {
+        Mqtt.handleError(err)
+      }
     } else {
       debug(`Topic not valid: ${topic}`)
     }
   }
 
-  async registerAgent ({ payload, publisher }) {
-    try {
-      debug(`Payload: ${payload}`)
-      const { agent } = parsePayload(payload)
-      const agent2 = { ...agent, connected: true }
-      await this.agentService.createOrUpdate(agent2)
-      debug(`Agent: ${agent.uuid} saved`)
-      if (!this.agents.get(publisher.id)) {
-        this.agents.set(publisher.id, agent)
-        this.mqttModule.publish({
-          topic: Mqtt.getTopicsAllowed().connectedAgent,
-          payload: JSON.stringify(agent)
-        })
-      }
-    } catch (err) {
-      Mqtt.handleError(err)
+  async registerAgent ({ agent, publisher }) {
+    await this.agentService.createOrUpdate({ ...agent, connected: true })
+    debug(`Agent: ${agent.uuid} saved`)
+    if (!this.agents.get(publisher.id)) {
+      this.agents.set(publisher.id, agent)
+      this.mqttModule.publish({
+        topic: Mqtt.getTopicsAllowed().connectedAgent,
+        payload: JSON.stringify(agent)
+      })
     }
   }
 
