@@ -3,14 +3,14 @@
 const test = require('ava')
 const sinon = require('sinon')
 const proxyquire = require('proxyquire')
-const { stringPayload, publisher, stringAgent, plainObjectAgent } = require('./fixtures')
-const registerAgentsArgs = { agent: plainObjectAgent, publisher }
+const { stringPayload, publisher, stringAgent, plainObjectAgent, getMetricByType, metrics } = require('./fixtures')
 
 let module
 let debug = null
 let sandbox = null
 let mqtt = null
-let mockAgentService = null
+const mockAgentService = {}
+const mockMetricService = {}
 const mqttModule = {}
 
 const createOrUpdateArgs = Object.assign({}, plainObjectAgent, { connected: true })
@@ -24,12 +24,15 @@ test.beforeEach(async () => {
   process.on = sandbox.stub()
   mqttModule.on = sandbox.spy()
   mqttModule.publish = sandbox.spy()
-  mockAgentService = sandbox.stub()
+  mockMetricService.create = sandbox.stub()
+  mockMetricService.create.withArgs(plainObjectAgent.uuid, getMetricByType('a')).returns(Promise.resolve({id: ''}))
+  mockMetricService.create.withArgs(plainObjectAgent.uuid, getMetricByType('b')).returns(Promise.resolve({id: ''}))
   mockAgentService.createOrUpdate = sandbox.stub()
   mockAgentService.createOrUpdate.withArgs(createOrUpdateArgs).returns(Promise.resolve())
   mqtt = module.startServer({
     mqttModule,
-    agentService: mockAgentService
+    agentService: mockAgentService,
+    metricService: mockMetricService
   })
 })
 
@@ -67,17 +70,35 @@ test.serial('mqtt#onPublishedMessage topic not valid', async t => {
   t.true(debug.calledWith(`Topic not valid: ${topic}`), `Should receive a message with a invalid topic ${topic}`)
 })
 
-test('mqtt#onPublishedMessage publish message with the payload in string format and buffer format', async t => {
+test.serial('mqtt#onPublishedMessage publish with topic: agentPublishesMessage', async t => {
   const { agentPublishesMessage: topic } = module.Mqtt.getTopicsAllowed()
-  const testCases = [{ payload: stringPayload }, { payload: Buffer.from(stringPayload) }]
-  for (let { payload } of testCases) {
-    const registerAgentStub = sinon.stub(mqtt, 'registerAgent')
-    await mqtt.onPublishedMessage({ topic, payload }, publisher)
+  const agentPublishesMessageStub = sinon.stub(mqtt, 'agentPublishesMessage')
+  await mqtt.onPublishedMessage({ topic, payload: stringPayload }, publisher)
 
-    t.true(registerAgentStub.called, 'Should register an agent')
-    t.true(registerAgentStub.calledWith(registerAgentsArgs), 'Should register an agent')
+  t.true(agentPublishesMessageStub.called, 'Should publishes a message')
+  t.true(agentPublishesMessageStub.calledWith(stringPayload, publisher), 'Should publishes a message')
+  agentPublishesMessageStub.restore()
+})
+
+test.serial('mqtt#agentPublishesMessage publish message with the payload in string format and buffer format', async t => {
+  const registerAgentStub = sinon.stub(mqtt, 'registerAgent')
+  const storeMetricsStub = sinon.stub(mqtt, 'storeMetrics')
+  const testCases = [{ payload: stringPayload }]
+  for (const testCase of testCases) {
+    await mqtt.agentPublishesMessage(testCase.payload, publisher)
+    t.true(debug.called, `Should debug a message`)
+    t.true(registerAgentStub.calledWith({ agent: plainObjectAgent, publisher }), 'Should register an Agent')
+    t.true(storeMetricsStub.calledWith({ metrics, uuid: plainObjectAgent.uuid }), 'Should store the metrics')
+    storeMetricsStub.restore()
     registerAgentStub.restore()
   }
+})
+
+test.serial('mqtt#storeMetrics', async t => {
+  await mqtt.storeMetrics({ metrics, uuid: plainObjectAgent.uuid })
+  t.true(mockMetricService.create.called, 'Should create a metric')
+  t.true(mockMetricService.create.calledWith(plainObjectAgent.uuid, getMetricByType('a')), 'Should create a metric')
+  t.true(mockMetricService.create.calledWith(plainObjectAgent.uuid, getMetricByType('b')), 'Should create a metric')
 })
 
 test.serial('mqtt#registerAgent', async t => {
