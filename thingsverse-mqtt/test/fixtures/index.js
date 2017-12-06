@@ -8,22 +8,20 @@ const agent = {
   createdAt: new Date(),
   updatedAt: new Date()
 }
-
-const invalidAgent = {
-  uuid: null
-}
-
-const payload = { agent, metrics: [] }
+const metric = { type: 'a', value: '{"data": "fakeData-2"}' }
+const metrics = [metric, { type: 'b', value: 100 }]
+const payload = { agent, metrics }
 const stringPayload = JSON.stringify(payload)
 const publisher = { id: '111' }
 const stringAgent = JSON.stringify(agent)
 const plainObjectAgent = JSON.parse(stringAgent)
 module.exports = {
   agent,
-  invalidAgent,
   payload,
   stringPayload,
   publisher,
   stringAgent,
-  plainObjectAgent
+  plainObjectAgent,
+  metrics,
+  getMetricByType: (type) => metrics.filter(m => m.type === type).shift()
 }
