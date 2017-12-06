@@ -5,9 +5,10 @@ const chalk = require('chalk')
 const { parsePayload } = require('./payload')
 
 class Mqtt {
-  constructor ({ mqttModule, agentService }) {
+  constructor ({ mqttModule, agentService, metricService }) {
     this.mqttModule = mqttModule
     this.agentService = agentService
+    this.metricService = metricService
     this.agents = new Map()
     this.setEvents()
   }
@@ -26,22 +27,33 @@ class Mqtt {
     this.agents.set(client.id, null)
   }
 
-  async onPublishedMessage ({ topic, payload }, publisher) {
+  onPublishedMessage ({ topic, payload }, publisher) {
     debug(`Received: ${topic}`)
-    if (Mqtt.isConnectedAgent(topic) || Mqtt.isDisconnectedAgent(topic)) {
-      return debug(`Payload: ${payload}`)
+    switch (topic) {
+      case Mqtt.getTopicsAllowed().connectedAgent:
+      case Mqtt.getTopicsAllowed().disconnectedAgent:
+        return debug(`Payload: ${payload}`)
+      case Mqtt.getTopicsAllowed().agentPublishesMessage:
+        return this.agentPublishesMessage(payload, publisher)
+      default:
+        debug(`Topic not valid: ${topic}`)
     }
+  }
 
-    if (Mqtt.isAgentPublishesMessage(topic)) {
-      try {
-        debug(`Payload: ${payload}`)
-        const { agent } = parsePayload(payload)
+  async agentPublishesMessage (payload, publisher) {
+    try {
+      debug(`Payload: ${payload}`)
+      const parsedPayload = parsePayload(payload)
+      const isValidPayload = parsedPayload && parsedPayload.agent && parsedPayload.metrics
+      if (isValidPayload) {
+        const { agent, metrics } = parsedPayload
         await this.registerAgent({ agent, publisher })
-      } catch (err) {
-        Mqtt.handleError(err)
+        await this.storeMetrics({ metrics, uuid: agent.uuid })
+      } else {
+        debug(`${chalk.blue('[Warning]')} Payload not valid: ${parsedPayload}`)
       }
-    } else {
-      debug(`Topic not valid: ${topic}`)
+    } catch (err) {
+      Mqtt.handleError(err)
     }
   }
 
@@ -54,6 +66,17 @@ class Mqtt {
         topic: Mqtt.getTopicsAllowed().connectedAgent,
         payload: JSON.stringify(agent)
       })
+    }
+  }
+
+  async storeMetrics ({ metrics, uuid }) {
+    for (let metric of metrics) {
+      try {
+        const createdMetric = await this.metricService.create(uuid, metric)
+        debug(`Metric: ${createdMetric.id} saved on agent ${uuid}`)
+      } catch (err) {
+        Mqtt.handleError(err)
+      }
     }
   }
 
@@ -93,8 +116,8 @@ class Mqtt {
   }
 }
 
-function startServer ({ mqttModule, agentService }) {
-  return new Mqtt({ mqttModule, agentService })
+function startServer ({ mqttModule, agentService, metricService }) {
+  return new Mqtt({ mqttModule, agentService, metricService })
 }
 
 module.exports = {
