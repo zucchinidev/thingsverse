@@ -29,10 +29,11 @@ async function init () {
     console.log(`${chalk.green('[thingsverse-mqtt]')} server is running`)
   })
 
-  const { Agent: agentService } = await db(dataBaseSettings)
+  const { Agent: agentService, Metric: metricService } = await db(dataBaseSettings)
   startServer({
     mqttModule,
-    agentService
+    agentService,
+    metricService
   })
 }
 
