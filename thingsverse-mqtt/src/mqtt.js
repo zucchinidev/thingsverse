@@ -15,7 +15,7 @@ class Mqtt {
 
   setEvents () {
     this.mqttModule.on('clientConnected', this.onClientConnected.bind(this))
-    this.mqttModule.on('clientDisconnected', Mqtt.onClientDisconnected)
+    this.mqttModule.on('clientDisconnected', this.onClientDisconnected.bind(this))
     this.mqttModule.on('published', this.onPublishedMessage.bind(this))
     this.mqttModule.on('error', Mqtt.handleFatalError)
     process.on('uncaughtException', Mqtt.handleFatalError)
@@ -30,10 +30,10 @@ class Mqtt {
   onPublishedMessage ({ topic, payload }, publisher) {
     debug(`Received: ${topic}`)
     switch (topic) {
-      case Mqtt.getTopicsAllowed().connectedAgent:
-      case Mqtt.getTopicsAllowed().disconnectedAgent:
+      case Mqtt.topics().connectedAgent:
+      case Mqtt.topics().disconnectedAgent:
         return debug(`Payload: ${payload}`)
-      case Mqtt.getTopicsAllowed().agentPublishesMessage:
+      case Mqtt.topics().agentPublishesMessage:
         return this.agentPublishesMessage(payload, publisher)
       default:
         debug(`Topic not valid: ${topic}`)
@@ -63,7 +63,7 @@ class Mqtt {
     if (!this.agents.get(publisher.id)) {
       this.agents.set(publisher.id, agent)
       this.mqttModule.publish({
-        topic: Mqtt.getTopicsAllowed().connectedAgent,
+        topic: Mqtt.topics().connectedAgent,
         payload: JSON.stringify(agent)
       })
     }
@@ -80,23 +80,40 @@ class Mqtt {
     }
   }
 
-  static onClientDisconnected (client) {
+  async onClientDisconnected (client) {
     debug(`Client Disconnected ${client.id}`)
+    const agent = this.agents.get(client.id)
+    if (agent) {
+      agent.connected = false
+      try {
+        await this.agentService.createOrUpdate(agent)
+        this.agents.delete(client.id)
+        const topic = Mqtt.topics().disconnectedAgent
+        const payload = JSON.stringify({ agent: { uuid: agent.uuid } })
+        this.mqttModule.publish({
+          topic,
+          payload
+        })
+        debug(`Client with id: ${client.id} associated to Agent (${agent.uuid}) marked as disconnected`)
+      } catch (err) {
+        return Mqtt.handleError(err)
+      }
+    }
   }
 
   static isConnectedAgent (topic) {
-    return topic === Mqtt.getTopicsAllowed().connectedAgent
+    return topic === Mqtt.topics().connectedAgent
   }
 
   static isDisconnectedAgent (topic) {
-    return topic === Mqtt.getTopicsAllowed().disconnectedAgent
+    return topic === Mqtt.topics().disconnectedAgent
   }
 
   static isAgentPublishesMessage (topic) {
-    return topic === Mqtt.getTopicsAllowed().agentPublishesMessage
+    return topic === Mqtt.topics().agentPublishesMessage
   }
 
-  static getTopicsAllowed () {
+  static topics () {
     return {
       connectedAgent: 'agent/connected',
       disconnectedAgent: 'agent/disconnected',
