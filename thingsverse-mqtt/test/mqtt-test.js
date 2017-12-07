@@ -18,17 +18,18 @@ const createOrUpdateArgs = Object.assign({}, plainObjectAgent, { connected: true
 test.beforeEach(async () => {
   sandbox = sinon.sandbox.create()
   debug = sandbox.spy()
-  module = proxyquire('../mqtt', {
+  module = proxyquire('../src/mqtt', {
     'debug': () => debug
   })
   process.on = sandbox.stub()
   mqttModule.on = sandbox.spy()
   mqttModule.publish = sandbox.spy()
   mockMetricService.create = sandbox.stub()
-  mockMetricService.create.withArgs(plainObjectAgent.uuid, getMetricByType('a')).returns(Promise.resolve({id: ''}))
-  mockMetricService.create.withArgs(plainObjectAgent.uuid, getMetricByType('b')).returns(Promise.resolve({id: ''}))
+  mockMetricService.create.withArgs(plainObjectAgent.uuid, getMetricByType('a')).returns(Promise.resolve({ id: '' }))
+  mockMetricService.create.withArgs(plainObjectAgent.uuid, getMetricByType('b')).returns(Promise.resolve({ id: '' }))
   mockAgentService.createOrUpdate = sandbox.stub()
   mockAgentService.createOrUpdate.withArgs(createOrUpdateArgs).returns(Promise.resolve())
+  mockAgentService.createOrUpdate.withArgs(Object.assign({}, plainObjectAgent, { connected: false })).returns(Promise.resolve())
   mqtt = module.startServer({
     mqttModule,
     agentService: mockAgentService,
@@ -53,8 +54,8 @@ test('mqtt#constructor', t => {
 
 test('mqtt#onPublishedMessage connectedAgent && disconnectedAgent', t => {
   const cases = [
-    { topic: module.Mqtt.getTopicsAllowed().connectedAgent, payload: 'payload' },
-    { topic: module.Mqtt.getTopicsAllowed().disconnectedAgent, payload: 'payload' }
+    { topic: module.Mqtt.topics().connectedAgent, payload: 'payload' },
+    { topic: module.Mqtt.topics().disconnectedAgent, payload: 'payload' }
   ]
   cases.forEach((c) => {
     mqtt.onPublishedMessage(c, {})
@@ -71,7 +72,7 @@ test.serial('mqtt#onPublishedMessage topic not valid', async t => {
 })
 
 test.serial('mqtt#onPublishedMessage publish with topic: agentPublishesMessage', async t => {
-  const { agentPublishesMessage: topic } = module.Mqtt.getTopicsAllowed()
+  const { agentPublishesMessage: topic } = module.Mqtt.topics()
   const agentPublishesMessageStub = sinon.stub(mqtt, 'agentPublishesMessage')
   await mqtt.onPublishedMessage({ topic, payload: stringPayload }, publisher)
 
@@ -83,7 +84,7 @@ test.serial('mqtt#onPublishedMessage publish with topic: agentPublishesMessage',
 test.serial('mqtt#agentPublishesMessage publish message with the payload in string format and buffer format', async t => {
   const registerAgentStub = sinon.stub(mqtt, 'registerAgent')
   const storeMetricsStub = sinon.stub(mqtt, 'storeMetrics')
-  const testCases = [{ payload: stringPayload }]
+  const testCases = [{ payload: stringPayload }, { payload: Buffer.from(stringPayload) }]
   for (const testCase of testCases) {
     await mqtt.agentPublishesMessage(testCase.payload, publisher)
     t.true(debug.called, `Should debug a message`)
@@ -102,7 +103,7 @@ test.serial('mqtt#storeMetrics', async t => {
 })
 
 test.serial('mqtt#registerAgent', async t => {
-  const { connectedAgent: topic } = module.Mqtt.getTopicsAllowed()
+  const { connectedAgent: topic } = module.Mqtt.topics()
   const publishedMessage = { topic, payload: stringAgent }
 
   t.is(mqtt.agents.get('111'), undefined, 'initially we do not have connected agents')
@@ -122,31 +123,59 @@ test.serial('mqtt#onClientConnected', t => {
   mqtt.agents.clear()
 })
 
-test('Mqtt#onClientDisconnected', t => {
-  module.Mqtt.onClientDisconnected({ id: '22' })
+test.serial('Mqtt#onClientDisconnected', async t => {
+  const { disconnectedAgent: topic } = module.Mqtt.topics()
+  const payload = JSON.stringify({ agent: { uuid: plainObjectAgent.uuid } })
+  const publishedMessage = { topic, payload }
+  mqtt.agents.set('22', plainObjectAgent)
+  const client = { id: '22' }
+
+  await mqtt.onClientDisconnected(client)
   t.true(debug.called, 'Should log a disconnected client')
+  t.is(mqtt.agents.get('22'), undefined, 'Should remove the agent of the list of agents')
+  t.true(mqttModule.publish.called, 'Should post a message to notify the disconnected agent')
+  t.true(mqttModule.publish.calledWith(publishedMessage), 'Should post a message for the connected agent')
+  t.true(debug.calledWith(`Client with id: ${client.id} associated to Agent (${plainObjectAgent.uuid}) marked as disconnected`), 'Should show a message to notify the disconnected agent')
+})
+
+test.serial('Mqtt#onClientDisconnected with invalid agent', async t => {
+  mqtt.agentService = {
+    createOrUpdate () {}
+  }
+  const createOrUpdateStub = sinon.stub(mqtt.agentService, 'createOrUpdate')
+  createOrUpdateStub.withArgs({ connected: false }).returns(Promise.reject(new Error('')))
+  const mock = sinon.stub(module.Mqtt, 'handleError')
+  mqtt.agents.set('33', {})
+  const client = { id: '33' }
+  await mqtt.onClientDisconnected(client)
+  t.deepEqual(mqtt.agents.get('33'), { connected: false }, 'Should does not remove the agent of the list of agents')
+  t.true(createOrUpdateStub.called, 'Should try to modify the agent')
+  t.true(mock.called, 'Should log an error message')
+  mock.restore()
+  createOrUpdateStub.restore()
+  mqtt.agents.delete('33')
 })
 
 test('Mqtt#isConnectedAgent', t => {
-  const topic = module.Mqtt.getTopicsAllowed().connectedAgent
+  const topic = module.Mqtt.topics().connectedAgent
   const result = module.Mqtt.isConnectedAgent(topic)
   t.true(result, 'Should check if the topic has the value agent connected')
 })
 
 test('Mqtt#isDisconnectedAgent', t => {
-  const topic = module.Mqtt.getTopicsAllowed().disconnectedAgent
+  const topic = module.Mqtt.topics().disconnectedAgent
   const result = module.Mqtt.isDisconnectedAgent(topic)
   t.true(result, 'Should check if the topic has the value agent disconnected')
 })
 
 test('Mqtt#isAgentPublishesMessage', t => {
-  const topic = module.Mqtt.getTopicsAllowed().agentPublishesMessage
+  const topic = module.Mqtt.topics().agentPublishesMessage
   const result = module.Mqtt.isAgentPublishesMessage(topic)
   t.true(result, 'Should check if the topic has the value agent publish a message')
 })
 
-test('Mqtt#getTopicsAllowed', t => {
-  const availableMessages = module.Mqtt.getTopicsAllowed()
+test('Mqtt#topics', t => {
+  const availableMessages = module.Mqtt.topics()
   t.deepEqual(availableMessages, {
     connectedAgent: 'agent/connected',
     disconnectedAgent: 'agent/disconnected',
