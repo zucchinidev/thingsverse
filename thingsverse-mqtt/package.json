@@ -7,7 +7,7 @@
   "scripts": {
     "lint": "standard",
     "start": "NODE_ENV=production node src/index.js",
-    "start-dev": "DEBUG=thingsverse:* nodemon index.js",
+    "start-dev": "DEBUG=thingsverse:* nodemon src/index.js",
     "test": "NODE_ENV=test DEBUG=thingsverse:* nyc --reporter=lcov ava test/ --verbose"
   },
   "repository": {
