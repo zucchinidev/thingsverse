@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "description": "A simple IoT Platform - DB Module",
   "private": true,
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "lint": "standard",
-    "setup": "DEBUG=thingsverse:* node setup.js",
+    "setup": "DEBUG=thingsverse:* node src/setup.js",
     "test": "DEBUG=thingsverse:* nyc --reporter=lcov ava test/ --verbose"
   },
   "repository": {
