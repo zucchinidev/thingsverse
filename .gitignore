@@ -6,3 +6,6 @@ thingsverse-mqtt/node_modules
 thingsverse-mqtt/node_modules
 thingsverse-mqtt/coverage
 thingsverse-mqtt/.nyc_output
+thingsverse-agent/node_modules
+thingsverse-agent/coverage
+thingsverse-agent/.nyc_output
