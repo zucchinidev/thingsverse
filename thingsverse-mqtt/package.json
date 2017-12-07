@@ -3,10 +3,10 @@
   "version": "0.0.1",
   "description": "A Simple IoT Platform - MQTT Server",
   "private": true,
-  "main": "index.js",
+  "main": "src/index.js",
   "scripts": {
     "lint": "standard",
-    "start": "NODE_ENV=production node index.js",
+    "start": "NODE_ENV=production node src/index.js",
     "start-dev": "DEBUG=thingsverse:* nodemon index.js",
     "test": "NODE_ENV=test DEBUG=thingsverse:* nyc --reporter=lcov ava test/ --verbose"
   },
