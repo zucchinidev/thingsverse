@@ -11,8 +11,14 @@ const agent = new ThingsverseAgent({
 })
 
 agent.connect()
+agent.on('connected') // self
+agent.on('disconnected') // self
+agent.on('message') // self
 
-agent.on('agent/message', payload => console.log(payload))
+
+agent.on('agent/connected') // other agents
+agent.on('agent/disconnected') // other agents
+agent.on('agent/message', payload => console.log(payload)) // other agents
 
 
 setTimeout(() => agent.disconnect(), 20000)
