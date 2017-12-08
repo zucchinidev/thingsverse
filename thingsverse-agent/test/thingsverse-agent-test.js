@@ -16,7 +16,8 @@ test.beforeEach(async () => {
   debug = sandbox.spy()
   clientStub = {
     subscribe: sandbox.spy(),
-    on: sandbox.stub()
+    on: sandbox.stub(),
+    end: sandbox.spy()
   }
   mqttStub.connect = sandbox.stub().returns(clientStub)
   uuidStub.v4 = sandbox.stub().returns('xxx')
@@ -73,6 +74,7 @@ test('thingsverserAgent@disconnect', t => {
   thingsverseAgent.on('disconnected', onDisconnectedSpy)
   thingsverseAgent.disconnect()
   t.true(onDisconnectedSpy.called, 'should emit a disconnected agent event')
+  t.true(clientStub.end.called, 'should disconnect from server')
   thingsverseAgent.removeListener('disconnected', onDisconnectedSpy)
 })
 
