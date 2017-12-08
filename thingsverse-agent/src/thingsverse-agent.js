@@ -4,6 +4,8 @@ const EventEmitter = require('events')
 const debug = require('debug')('thingsverse:agent')
 const defaults = require('defaults')
 const mqtt = require('mqtt')
+const util = require('util')
+const os = require('os')
 const { parsePayload } = require('thingsverse-payload-parser')
 const { v4 } = require('uuid')
 
@@ -27,6 +29,15 @@ module.exports = class ThingsverseAgent extends EventEmitter {
     this._timer = null
     this._started = false
     this._client = null
+    this._metrics = new Map()
+  }
+
+  addMetric (type, fn) {
+    this._metrics.set(type, fn)
+  }
+
+  removeMetric (type) {
+    this._metrics.delete(type)
   }
 
   connect () {
@@ -50,8 +61,39 @@ module.exports = class ThingsverseAgent extends EventEmitter {
     this._timer = setInterval(this.emitMessage.bind(this), interval)
   }
 
-  emitMessage () {
-    this.emit('agent/message', 'this is a message')
+  async emitMessage () {
+    if (this._metrics.size > 0) {
+      const message = this.getNewMessage()
+
+      for (let [type, fn] of this._metrics) {
+        if (fn.length === 1) {
+          fn = util.promisify(fn)
+        }
+
+        message.metrics.push({
+          type,
+          value: await Promise.resolve(fn())
+        })
+      }
+      debug(`Sending ${message}`)
+      this._client.publish('agent/message', JSON.stringify(message))
+      this.emit('message', message)
+    }
+  }
+
+  getNewMessage () {
+    const { username, name } = this.options
+    return {
+      agent: {
+        uuid: this.agentId,
+        username,
+        name,
+        hostname: os.hostname() || 'localhost',
+        pid: process.pid
+      },
+      metrics: [],
+      timestamp: new Date().getTime()
+    }
   }
 
   messageReceived (topic, payload) {
@@ -74,7 +116,8 @@ module.exports = class ThingsverseAgent extends EventEmitter {
     if (this._started) {
       clearInterval(this._timer)
       this._started = false
-      this.emit('disconnected')
+      this.emit('disconnected', this.agentId)
+      this._client.end()
     }
   }
 }
