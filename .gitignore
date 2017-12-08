@@ -9,3 +9,6 @@ thingsverse-mqtt/.nyc_output
 thingsverse-agent/node_modules
 thingsverse-agent/coverage
 thingsverse-agent/.nyc_output
+thingsverse-payload-parser/node_modules
+thingsverse-payload-parser/coverage
+thingsverse-payload-parser/.nyc_output
