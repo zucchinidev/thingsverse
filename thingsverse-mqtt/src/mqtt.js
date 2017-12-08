@@ -2,7 +2,7 @@
 
 const debug = require('debug')('thingsverse:mqtt')
 const chalk = require('chalk')
-const { parsePayload } = require('./payload')
+const { parsePayload } = require('thingsverse-payload-parser')
 
 class Mqtt {
   constructor ({ mqttModule, agentService, metricService }) {

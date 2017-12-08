@@ -33,6 +33,7 @@
     "debug": "^3.1.0",
     "mosca": "^2.7.0",
     "redis": "^2.8.0",
-    "thingsverse-db": "file:../thingsverse-db"
+    "thingsverse-db": "file:../thingsverse-db",
+    "thingsverse-payload-parser": "file:../thingsverse-payload-parser"
   }
 }
