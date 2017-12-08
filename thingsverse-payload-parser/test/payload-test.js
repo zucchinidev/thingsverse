@@ -1,7 +1,7 @@
 'use strict'
 
 const test = require('ava')
-const { parsePayload } = require('../src/payload')
+const { parsePayload } = require('../')
 
 test('payload#parsePayload', t => {
   let result = parsePayload('{"a":"a"}')
