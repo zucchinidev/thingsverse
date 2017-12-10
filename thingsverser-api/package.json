@@ -1,0 +1,32 @@
+{
+  "name": "thingsverser-api",
+  "version": "0.0.1",
+  "description": "A Simple IoT Platform - API",
+  "main": "src/index.js",
+  "private": true,
+  "scripts": {
+    "test": "NODE_ENV=test DEBUG=thingsverse:* nyc --reporter=lcov ava test/ --verbose",
+    "lint": "standard",
+    "start": "NODE_ENV=production node src/index.js",
+    "start-dev": "DEBUG=thingsverse:* nodemon src/index.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zucchinidev/thingsverse.git"
+  },
+  "author": "Andrea Zucchini <azga84@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zucchinidev/thingsverse/issues"
+  },
+  "homepage": "https://github.com/zucchinidev/thingsverse#readme",
+  "devDependencies": {
+    "nodemon": "^1.12.5",
+    "standard": "^10.0.3"
+  },
+  "dependencies": {
+    "chalk": "^2.3.0",
+    "debug": "^3.1.0",
+    "express": "^4.16.2"
+  }
+}
