@@ -12,3 +12,6 @@ thingsverse-agent/.nyc_output
 thingsverse-payload-parser/node_modules
 thingsverse-payload-parser/coverage
 thingsverse-payload-parser/.nyc_output
+thingsverse-thingsverse-api/node_modules
+thingsverse-thingsverse-api/coverage
+thingsverse-thingsverse-api/.nyc_output
