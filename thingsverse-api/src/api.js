@@ -2,9 +2,29 @@
 
 const debug = require('debug')('thingsverse:api:routes')
 const express = require('express')
+const db = require('thingsverse-db')
+const asyncify = require('express-asyncify')
+
+const config = require('./config')
+
 const AgentNotFoundError = require('./errors/agent-not-found-error')
 
-const api = express.Router()
+const api = asyncify(express.Router())
+let services, Agent, Metric
+
+api.use('*', async (req, res, next) => {
+  if (!services) {
+    debug('Connecting to database')
+    try {
+      services = await db(config)
+    } catch (err) {
+      return next(err)
+    }
+    Agent = services.Agent
+    Metric = services.Metric
+  }
+  next()
+})
 
 api.get('/agents', (req, res) => {
   debug('A request has come to /agents')

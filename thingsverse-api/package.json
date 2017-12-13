@@ -22,14 +22,16 @@
   "homepage": "https://github.com/zucchinidev/thingsverse#readme",
   "devDependencies": {
     "ava": "^0.24.0",
-    "nodemon": "^1.12.5",
-    "nyc": "^11.3.0",
+    "nodemon": "^1.12.6",
+    "nyc": "^11.4.0",
     "standard": "^10.0.3",
     "supertest": "^3.0.0"
   },
   "dependencies": {
     "chalk": "^2.3.0",
     "debug": "^3.1.0",
-    "express": "^4.16.2"
+    "express": "^4.16.2",
+    "express-asyncify": "^1.0.0",
+    "thingsverse-db": "file:../thingsverse-db"
   }
 }
