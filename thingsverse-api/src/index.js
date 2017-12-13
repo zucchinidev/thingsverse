@@ -18,9 +18,6 @@ app.use((err, req, res, next) => {
   res.status(500).send({ error: err.message })
 })
 
-process.on('uncaughtException', handleFatalError)
-process.on('unhandledRejection', handleFatalError)
-
 function handleFatalError (err) {
   console.error(`${chalk.red('[fatal error]')} ${err.message}`)
   console.error(err.stack)
@@ -28,6 +25,13 @@ function handleFatalError (err) {
 }
 
 const server = http.createServer(app)
-server.listen(port, () => {
-  console.log(`${chalk.green('[thingsverse-api]')} server listening on port ${port}`)
-})
+
+if (!module.parent) {
+  server.listen(port, () => {
+    console.log(`${chalk.green('[thingsverse-api]')} server listening on port ${port}`)
+  })
+  process.on('uncaughtException', handleFatalError)
+  process.on('unhandledRejection', handleFatalError)
+}
+
+module.exports = server
