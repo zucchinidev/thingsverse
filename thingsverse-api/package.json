@@ -21,8 +21,11 @@
   },
   "homepage": "https://github.com/zucchinidev/thingsverse#readme",
   "devDependencies": {
+    "ava": "^0.24.0",
     "nodemon": "^1.12.5",
-    "standard": "^10.0.3"
+    "nyc": "^11.3.0",
+    "standard": "^10.0.3",
+    "supertest": "^3.0.0"
   },
   "dependencies": {
     "chalk": "^2.3.0",
