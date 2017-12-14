@@ -7,8 +7,9 @@ module.exports = class MetricsNotFoundError extends Error {
     this.type = type || null
     this.code = 404
     Error.captureStackTrace(this, MetricsNotFoundError)
+    const msg = `Metrics of Agent with uuid ${uuid}`
     this.message = (type)
-      ? `Metrics of Agent with uuid ${uuid} and type${type} not found `
-      : `Agent with uuid ${uuid} not found`
+      ? `${msg} and type ${type} not found`
+      : `${msg} not found`
   }
 }
