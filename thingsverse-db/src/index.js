@@ -1,14 +1,14 @@
 'use strict'
 
+const defaults = require('defaults')
 const setupDatabase = require('./lib/db')
 const setupAgentModel = require('./models/agent')
 const setupMetricModel = require('./models/metric')
 const setupAgent = require('./lib/agent')
 const setupMetric = require('./lib/metric')
+const { metric, agent } = require('../test/fixtures')
 
-const defaults = require('defaults')
-
-module.exports = async function (config) {
+const db = async function (config) {
   config = defaults(config, {
     dialect: 'sqlite',
     pool: {
@@ -38,5 +38,12 @@ module.exports = async function (config) {
   return {
     Agent,
     Metric
+  }
+}
+module.exports = {
+  db,
+  testFixtures: {
+    metric,
+    agent
   }
 }

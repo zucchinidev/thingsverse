@@ -3,7 +3,7 @@
 const test = require('ava')
 const proxyquire = require('proxyquire')
 const sinon = require('sinon')
-const agentFixtures = require('./fixtures/agent')
+const { agent: agentFixtures } = require('./fixtures')
 
 const single = Object.assign({}, agentFixtures.single)
 const id = 1
@@ -62,11 +62,11 @@ test.beforeEach(async () => {
   AgentModelStub.findAll.withArgs(connectedArgs).returns(Promise.resolve(agentFixtures.connected))
   AgentModelStub.findAll.withArgs(usernameArgs).returns(Promise.resolve(agentFixtures.things))
 
-  const setupDatabase = proxyquire('../', {
+  const module = proxyquire('../', {
     './models/agent': () => AgentModelStub,
     './models/metric': () => MetricModelStub
   })
-  db = await setupDatabase(config)
+  db = await module.db(config)
 })
 
 test.afterEach(() => {

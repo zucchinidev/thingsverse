@@ -3,7 +3,7 @@
 const agent = {
   id: 1,
   uuid: 'yyy-yyy-yyy',
-  name: 'fixture',
+  name: 'agentFixture',
   username: 'things',
   hostname: 'text-host',
   pid: 0,
@@ -24,7 +24,7 @@ function extend (obj, values) {
   return Object.assign(clone, values)
 }
 
-module.exports = {
+const agentFixture = {
   single: agent,
   all: agents,
   connected: agents.filter(a => a.connected),
@@ -32,3 +32,5 @@ module.exports = {
   findByUuid: uuid => agents.filter(a => a.uuid === uuid).shift(),
   findById: id => agents.filter(a => a.id === id).shift()
 }
+
+module.exports = agentFixture

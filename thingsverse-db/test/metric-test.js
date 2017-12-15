@@ -3,8 +3,7 @@
 const test = require('ava')
 const sinon = require('sinon')
 const proxyquire = require('proxyquire')
-const agentFixture = require('./fixtures/agent')
-const metricFixture = require('./fixtures/metric')
+const { agent: agentFixture, metric: metricFixture } = require('./fixtures')
 let sandbox = null
 let db = null
 let metricByTypeAgentId = null
@@ -83,12 +82,12 @@ test.beforeEach(async () => {
     .withArgs(returnedMetric)
     .returns(Promise.resolve(createdMetric))
 
-  const setupDatabase = proxyquire('../', {
+  const module = proxyquire('../', {
     './models/agent': () => AgentModelStub,
     './models/metric': () => MetricModelStub
   })
 
-  db = await setupDatabase(config)
+  db = await module.db(config)
 })
 
 test.afterEach(() => {
