@@ -4,7 +4,7 @@ const mosca = require('mosca')
 const redis = require('redis')
 const chalk = require('chalk')
 const { startServer } = require('./mqtt')
-const db = require('thingsverse-db')
+const { db } = require('thingsverse-db')
 
 const backend = {
   type: 'redis',
