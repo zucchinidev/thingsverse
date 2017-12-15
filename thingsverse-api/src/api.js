@@ -2,7 +2,7 @@
 
 const debug = require('debug')('thingsverse:api:routes')
 const express = require('express')
-const db = require('thingsverse-db')
+const { db } = require('thingsverse-db')
 const asyncify = require('express-asyncify')
 
 const config = require('./config')
