@@ -2,10 +2,16 @@
 
 const test = require('ava')
 const sinon = require('sinon')
+const { promisify } = require('util')
+
 const proxyquire = require('proxyquire')
 const request = require('supertest')
 const { agentFixture, metricFixture } = require('./fixtures')
+const auth = require('../src/auth')
+const config = require('../src/config')
 
+const sign = promisify(auth.sign)
+let token = null
 let sandbox = null
 let server = null
 let dbStub = null
@@ -39,6 +45,7 @@ test.beforeEach(async () => {
     'thingsverse-db': thingsverseDbStub
   })
 
+  token = await sign({ admin: true, username: 'test' }, config.auth.secret)
   server = proxyquire('../', {
     './api': api
   })
@@ -104,6 +111,7 @@ for (const testCase of testCases) {
   test.serial.cb(testCase.text, t => {
     request(server)
       .get(testCase.path)
+      .set('Authorization', `Bearer ${token}`)
       .expect(testCase.statusCode)
       .expect('Content-Type', testCase.contentType)
       .end((err, res) => {
