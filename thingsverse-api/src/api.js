@@ -4,11 +4,11 @@ const debug = require('debug')('thingsverse:api:routes')
 const express = require('express')
 const { db } = require('thingsverse-db')
 const asyncify = require('express-asyncify')
+const auth = require('express-jwt')
 
 const config = require('./config')
 
-const AgentNotFoundError = require('./errors/agent-not-found-error')
-const MetricsNotFoundError = require('./errors/metrics-not-found-error')
+const { AgentNotFoundError, MetricsNotFoundError, NotAuthenticatedError, NotAuthorizedError } = require('./errors')
 
 const api = asyncify(express.Router())
 let services
@@ -25,10 +25,19 @@ api.use('*', async (req, res, next) => {
   next()
 })
 
-api.get('/agents', async (req, res, next) => {
+api.get('/agents', auth(config.auth), async (req, res, next) => {
   debug('A request has come to /agents')
   try {
-    const agents = await services.Agent.findConnected()
+    let agents
+    const { user } = req
+    if (!user || !user.username) {
+      return next(new NotAuthorizedError())
+    }
+    if (user.admin) {
+      agents = await services.Agent.findConnected()
+    } else {
+      agents = await services.Agent.findByUsername(user.username)
+    }
     res.send(agents)
   } catch (err) {
     return next(err)
@@ -75,9 +84,6 @@ api.get('/metrics/:uuid/:type', async (req, res, next) => {
   } catch (err) {
     return next(err)
   }
-
-  const { uuid, type } = req.params
-  res.send({ uuid, type })
 })
 
 module.exports = api
