@@ -5,7 +5,7 @@
   "main": "src/index.js",
   "private": true,
   "scripts": {
-    "test": "NODE_ENV=test nyc --reporter=lcov ava test/ --verbose",
+    "test": "NODE_ENV=test DEBUG=thingsverse:* nyc --reporter=lcov ava test/ --verbose",
     "lint": "standard",
     "start": "NODE_ENV=production node src/index.js",
     "start-dev": "DEBUG=thingsverse:* nodemon src/index.js"
@@ -34,6 +34,8 @@
     "debug": "^3.1.0",
     "express": "^4.16.2",
     "express-asyncify": "^1.0.0",
+    "express-jwt": "^5.3.0",
+    "jsonwebtoken": "^8.1.0",
     "thingsverse-db": "file:../thingsverse-db"
   }
 }
