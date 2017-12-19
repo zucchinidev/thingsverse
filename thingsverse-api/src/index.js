@@ -9,13 +9,13 @@ const api = require('./api')
 
 const port = process.env.PORT || 3000
 const app = asyncify(express())
+
 app.use('/api', api)
+
 app.use((err, req, res, next) => {
   debug(`Error: ${err.message}`)
-  if (err.statusCode || err.status || err.name === 'UnauthorizedError') {
-    return res.status(err.statusCode).send({ error: err.message })
-  }
-  res.status(500).send({ error: err.message })
+  const code = err.status || 500
+  res.status(code).send({ error: err.message })
 })
 
 function handleFatalError (err) {
