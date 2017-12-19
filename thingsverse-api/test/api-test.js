@@ -11,10 +11,6 @@ const auth = require('../src/auth')
 const config = require('../src/config')
 
 const sign = promisify(auth.sign)
-let token
-(async function () {
-  token = await sign({ admin: true, username: 'test' }, config.auth.secret)
-}())
 
 let sandbox = null
 let server = null
@@ -56,114 +52,127 @@ test.beforeEach(async () => {
 
 test.afterEach(() => {
   sandbox && sandbox.restore()
-})
+});
 
-const testCases = [
-  {
-    text: '/api/agents',
-    path: '/api/agents',
-    statusCode: 200,
-    contentType: /json/,
-    token,
-    expectedBody: JSON.stringify(agentFixture.connected)
-  },
-  {
-    text: '/api/agents/:uuid',
-    path: '/api/agents/yyy-yyy-yyy',
-    statusCode: 200,
-    contentType: /json/,
-    token,
-    expectedBody: JSON.stringify(agentFixture.single)
-  },
-  {
-    text: '/api/metrics/:uuid',
-    path: '/api/metrics/yyy-yyy-yyy',
-    statusCode: 200,
-    contentType: /json/,
-    token,
-    expectedBody: JSON.stringify({ metrics: metricFixture.getByUuid(1) })
-  },
-  {
-    text: '/api/metrics/:uuid/:type',
-    path: '/api/metrics/yyy-yyy-yyy/a',
-    statusCode: 200,
-    contentType: /json/,
-    token,
-    expectedBody: JSON.stringify({ metrics: metricFixture.getByTypeAgentId('a', 1) })
-  },
-  {
-    text: '/api/agents/:uuid - not found',
-    path: `/api/agents/${wrongUuid}`,
-    statusCode: 404,
-    contentType: /json/,
-    token,
-    expectedBody: JSON.stringify({ error: `Agent with uuid ${wrongUuid} not found` })
-  },
-  {
-    text: '/api/metrics/:uuid - not found',
-    path: `/api/metrics/${wrongUuid}`,
-    statusCode: 404,
-    contentType: /json/,
-    token,
-    expectedBody: JSON.stringify({ error: `Metrics of Agent with uuid ${wrongUuid} not found` })
-  },
-  {
-    text: '/api/metrics/:uuid/:type - not found',
-    path: `/api/metrics/${wrongUuid}/${wrongType}`,
-    statusCode: 404,
-    contentType: /json/,
-    token,
-    expectedBody: JSON.stringify({ error: `Metrics of Agent with uuid ${wrongUuid} and type ${wrongType} not found` })
-  },
-  {
-    text: '/api/agents - not authorized',
-    path: '/api/agents',
-    statusCode: 401,
-    contentType: /json/,
-    token: '',
-    expectedBody: JSON.stringify(agentFixture.connected)
-  },
-  {
-    text: '/api/agents/:uuid - not authorized',
-    path: '/api/agents/yyy-yyy-yyy',
-    statusCode: 401,
-    contentType: /json/,
-    token: '',
-    expectedBody: JSON.stringify(agentFixture.single)
-  },
-  {
-    text: '/api/metrics/:uuid - not authorized',
-    path: '/api/metrics/yyy-yyy-yyy',
-    statusCode: 401,
-    contentType: /json/,
-    token: '',
-    expectedBody: JSON.stringify({ metrics: metricFixture.getByUuid(1) })
-  },
-  {
-    text: '/api/metrics/:uuid/:type - not authorized',
-    path: '/api/metrics/yyy-yyy-yyy/a',
-    statusCode: 401,
-    contentType: /json/,
-    token: '',
-    expectedBody: JSON.stringify({ metrics: metricFixture.getByTypeAgentId('a', 1) })
+(async function () {
+  for (const testCase of await getTestCases()) {
+    test.serial.cb(testCase.text, t => {
+      request(server)
+        .get(testCase.path)
+        .set('Authorization', `Bearer ${testCase.token}`)
+        .expect(testCase.statusCode)
+        .expect('Content-Type', testCase.contentType)
+        .end((err, res) => {
+          t.falsy(err, 'should return an error')
+          const body = JSON.stringify(res.body)
+          t.deepEqual(body, testCase.expectedBody, 'response body should be the expected')
+          t.end()
+        })
+    })
   }
-]
+})()
 
-for (const testCase of testCases) {
-  console.log('********************')
-  console.log(testCase.token)
-  console.log('********************')
-  test.serial.cb(testCase.text, t => {
-    request(server)
-      .get(testCase.path)
-      .set('Authorization', `Bearer ${testCase.token}`)
-      .expect(testCase.statusCode)
-      .expect('Content-Type', testCase.contentType)
-      .end((err, res) => {
-        t.falsy(err, 'should return an error')
-        const body = JSON.stringify(res.body)
-        t.deepEqual(body, testCase.expectedBody, 'response body should be the expected')
-        t.end()
-      })
-  })
+async function getTestCases () {
+  const token = await sign({ admin: true, username: 'test' }, config.auth.secret)
+  const tokenWithoutUsername = await sign({ admin: true }, config.auth.secret)
+
+  const notAuthorizedBodyError = { error: 'No authorization token was found' }
+  return [
+    {
+      text: '/api/agents',
+      path: '/api/agents',
+      statusCode: 200,
+      contentType: /json/,
+      token,
+      expectedBody: JSON.stringify(agentFixture.connected)
+    },
+    {
+      text: '/api/agents/:uuid',
+      path: '/api/agents/yyy-yyy-yyy',
+      statusCode: 200,
+      contentType: /json/,
+      token,
+      expectedBody: JSON.stringify(agentFixture.single)
+    },
+    {
+      text: '/api/metrics/:uuid',
+      path: '/api/metrics/yyy-yyy-yyy',
+      statusCode: 200,
+      contentType: /json/,
+      token,
+      expectedBody: JSON.stringify({ metrics: metricFixture.getByUuid(1) })
+    },
+    {
+      text: '/api/metrics/:uuid/:type',
+      path: '/api/metrics/yyy-yyy-yyy/a',
+      statusCode: 200,
+      contentType: /json/,
+      token,
+      expectedBody: JSON.stringify({ metrics: metricFixture.getByTypeAgentId('a', 1) })
+    },
+    {
+      text: '/api/agents/:uuid - not found',
+      path: `/api/agents/${wrongUuid}`,
+      statusCode: 404,
+      contentType: /json/,
+      token,
+      expectedBody: JSON.stringify({ error: `Agent with uuid ${wrongUuid} not found` })
+    },
+    {
+      text: '/api/metrics/:uuid - not found',
+      path: `/api/metrics/${wrongUuid}`,
+      statusCode: 404,
+      contentType: /json/,
+      token,
+      expectedBody: JSON.stringify({ error: `Metrics of Agent with uuid ${wrongUuid} not found` })
+    },
+    {
+      text: '/api/metrics/:uuid/:type - not found',
+      path: `/api/metrics/${wrongUuid}/${wrongType}`,
+      statusCode: 404,
+      contentType: /json/,
+      token,
+      expectedBody: JSON.stringify({ error: `Metrics of Agent with uuid ${wrongUuid} and type ${wrongType} not found` })
+    },
+    {
+      text: '/api/agents - not authorized',
+      path: '/api/agents',
+      statusCode: 401,
+      contentType: /json/,
+      token: '',
+      expectedBody: JSON.stringify(notAuthorizedBodyError)
+    },
+    {
+      text: '/api/agents - not authorized without username',
+      path: '/api/agents',
+      statusCode: 401,
+      contentType: /json/,
+      token: tokenWithoutUsername,
+      expectedBody: JSON.stringify({ error: 'This user is not authorized to access the requested content' })
+    },
+    {
+      text: '/api/agents/:uuid - not authorized',
+      path: '/api/agents/yyy-yyy-yyy',
+      statusCode: 401,
+      contentType: /json/,
+      token: '',
+      expectedBody: JSON.stringify(notAuthorizedBodyError)
+    },
+    {
+      text: '/api/metrics/:uuid - not authorized',
+      path: '/api/metrics/yyy-yyy-yyy',
+      statusCode: 401,
+      contentType: /json/,
+      token: '',
+      expectedBody: JSON.stringify(notAuthorizedBodyError)
+    },
+    {
+      text: '/api/metrics/:uuid/:type - not authorized',
+      path: '/api/metrics/yyy-yyy-yyy/a',
+      statusCode: 401,
+      contentType: /json/,
+      token: '',
+      expectedBody: JSON.stringify(notAuthorizedBodyError)
+    }
+  ]
 }
