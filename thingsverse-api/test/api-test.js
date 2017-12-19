@@ -11,7 +11,11 @@ const auth = require('../src/auth')
 const config = require('../src/config')
 
 const sign = promisify(auth.sign)
-let token = null
+let token
+(async function () {
+  token = await sign({ admin: true, username: 'test' }, config.auth.secret)
+}())
+
 let sandbox = null
 let server = null
 let dbStub = null
@@ -45,7 +49,6 @@ test.beforeEach(async () => {
     'thingsverse-db': thingsverseDbStub
   })
 
-  token = await sign({ admin: true, username: 'test' }, config.auth.secret)
   server = proxyquire('../', {
     './api': api
   })
@@ -61,6 +64,7 @@ const testCases = [
     path: '/api/agents',
     statusCode: 200,
     contentType: /json/,
+    token,
     expectedBody: JSON.stringify(agentFixture.connected)
   },
   {
@@ -68,6 +72,7 @@ const testCases = [
     path: '/api/agents/yyy-yyy-yyy',
     statusCode: 200,
     contentType: /json/,
+    token,
     expectedBody: JSON.stringify(agentFixture.single)
   },
   {
@@ -75,6 +80,7 @@ const testCases = [
     path: '/api/metrics/yyy-yyy-yyy',
     statusCode: 200,
     contentType: /json/,
+    token,
     expectedBody: JSON.stringify({ metrics: metricFixture.getByUuid(1) })
   },
   {
@@ -82,6 +88,7 @@ const testCases = [
     path: '/api/metrics/yyy-yyy-yyy/a',
     statusCode: 200,
     contentType: /json/,
+    token,
     expectedBody: JSON.stringify({ metrics: metricFixture.getByTypeAgentId('a', 1) })
   },
   {
@@ -89,6 +96,7 @@ const testCases = [
     path: `/api/agents/${wrongUuid}`,
     statusCode: 404,
     contentType: /json/,
+    token,
     expectedBody: JSON.stringify({ error: `Agent with uuid ${wrongUuid} not found` })
   },
   {
@@ -96,6 +104,7 @@ const testCases = [
     path: `/api/metrics/${wrongUuid}`,
     statusCode: 404,
     contentType: /json/,
+    token,
     expectedBody: JSON.stringify({ error: `Metrics of Agent with uuid ${wrongUuid} not found` })
   },
   {
@@ -103,15 +112,51 @@ const testCases = [
     path: `/api/metrics/${wrongUuid}/${wrongType}`,
     statusCode: 404,
     contentType: /json/,
+    token,
     expectedBody: JSON.stringify({ error: `Metrics of Agent with uuid ${wrongUuid} and type ${wrongType} not found` })
+  },
+  {
+    text: '/api/agents - not authorized',
+    path: '/api/agents',
+    statusCode: 401,
+    contentType: /json/,
+    token: '',
+    expectedBody: JSON.stringify(agentFixture.connected)
+  },
+  {
+    text: '/api/agents/:uuid - not authorized',
+    path: '/api/agents/yyy-yyy-yyy',
+    statusCode: 401,
+    contentType: /json/,
+    token: '',
+    expectedBody: JSON.stringify(agentFixture.single)
+  },
+  {
+    text: '/api/metrics/:uuid - not authorized',
+    path: '/api/metrics/yyy-yyy-yyy',
+    statusCode: 401,
+    contentType: /json/,
+    token: '',
+    expectedBody: JSON.stringify({ metrics: metricFixture.getByUuid(1) })
+  },
+  {
+    text: '/api/metrics/:uuid/:type - not authorized',
+    path: '/api/metrics/yyy-yyy-yyy/a',
+    statusCode: 401,
+    contentType: /json/,
+    token: '',
+    expectedBody: JSON.stringify({ metrics: metricFixture.getByTypeAgentId('a', 1) })
   }
 ]
 
 for (const testCase of testCases) {
+  console.log('********************')
+  console.log(testCase.token)
+  console.log('********************')
   test.serial.cb(testCase.text, t => {
     request(server)
       .get(testCase.path)
-      .set('Authorization', `Bearer ${token}`)
+      .set('Authorization', `Bearer ${testCase.token}`)
       .expect(testCase.statusCode)
       .expect('Content-Type', testCase.contentType)
       .end((err, res) => {

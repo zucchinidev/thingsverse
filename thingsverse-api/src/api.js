@@ -44,7 +44,7 @@ api.get('/agents', auth(config.auth), async (req, res, next) => {
   }
 })
 
-api.get('/agents/:uuid', async (req, res, next) => {
+api.get('/agents/:uuid', auth(config.auth), async (req, res, next) => {
   try {
     const { uuid } = req.params
     debug(`request to /agents/${uuid}`)
@@ -58,7 +58,7 @@ api.get('/agents/:uuid', async (req, res, next) => {
   }
 })
 
-api.get('/metrics/:uuid', async (req, res, next) => {
+api.get('/metrics/:uuid', auth(config.auth), async (req, res, next) => {
   try {
     const { uuid } = req.params
     debug(`request to /metrics/${uuid}`)
@@ -72,7 +72,7 @@ api.get('/metrics/:uuid', async (req, res, next) => {
   }
 })
 
-api.get('/metrics/:uuid/:type', async (req, res, next) => {
+api.get('/metrics/:uuid/:type', auth(config.auth), async (req, res, next) => {
   try {
     const { uuid, type } = req.params
     debug(`request to /metrics/${uuid}/${type}`)
