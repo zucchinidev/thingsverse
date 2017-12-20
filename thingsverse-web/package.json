@@ -32,6 +32,7 @@
     "chalk": "^2.3.0",
     "debug": "^3.1.0",
     "express": "^4.16.2",
+    "thingsverse-agent": "file:../thingsverse-agent",
     "socket.io": "^2.0.4"
   }
 }
