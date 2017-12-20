@@ -5,6 +5,7 @@ const express = require('express')
 const { db } = require('thingsverse-db')
 const asyncify = require('express-asyncify')
 const auth = require('express-jwt')
+const guard = require('express-jwt-permissions')()
 
 const config = require('./config')
 
@@ -25,7 +26,7 @@ api.use('*', async (req, res, next) => {
   next()
 })
 
-api.get('/agents', auth(config.auth), async (req, res, next) => {
+api.get('/agents', auth(config.auth), guard.check(['agents:read']), async (req, res, next) => {
   debug('A request has come to /agents')
   try {
     let agents
@@ -44,7 +45,7 @@ api.get('/agents', auth(config.auth), async (req, res, next) => {
   }
 })
 
-api.get('/agents/:uuid', auth(config.auth), async (req, res, next) => {
+api.get('/agents/:uuid', auth(config.auth), guard.check(['agents:read']), async (req, res, next) => {
   try {
     const { uuid } = req.params
     debug(`request to /agents/${uuid}`)
@@ -58,7 +59,7 @@ api.get('/agents/:uuid', auth(config.auth), async (req, res, next) => {
   }
 })
 
-api.get('/metrics/:uuid', auth(config.auth), async (req, res, next) => {
+api.get('/metrics/:uuid', auth(config.auth), guard.check(['metrics:read']), async (req, res, next) => {
   try {
     const { uuid } = req.params
     debug(`request to /metrics/${uuid}`)
@@ -72,7 +73,7 @@ api.get('/metrics/:uuid', auth(config.auth), async (req, res, next) => {
   }
 })
 
-api.get('/metrics/:uuid/:type', auth(config.auth), async (req, res, next) => {
+api.get('/metrics/:uuid/:type', auth(config.auth), guard.check(['metrics:read']), async (req, res, next) => {
   try {
     const { uuid, type } = req.params
     debug(`request to /metrics/${uuid}/${type}`)
