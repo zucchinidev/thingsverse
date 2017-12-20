@@ -73,17 +73,28 @@ test.afterEach(() => {
 })()
 
 async function getTestCases () {
-  const token = await sign({ admin: true, username: 'test' }, config.auth.secret)
+  const tokenWithAgentsReadPermissions = await sign({
+    admin: true,
+    username: 'test',
+    permissions: ['agents:read']
+  }, config.auth.secret)
+  const tokenWithMetricsPermissions = await sign({
+    admin: true,
+    username: 'test',
+    permissions: ['metrics:read']
+  }, config.auth.secret)
+  const tokenWithoutPermissions = await sign({ admin: true, username: 'test', permissions: [] }, config.auth.secret)
   const tokenWithoutUsername = await sign({ admin: true }, config.auth.secret)
 
   const notAuthorizedBodyError = { error: 'No authorization token was found' }
+  const forbiddenBodyError = { error: 'Permission denied' }
   return [
     {
       text: '/api/agents',
       path: '/api/agents',
       statusCode: 200,
       contentType: /json/,
-      token,
+      token: tokenWithAgentsReadPermissions,
       expectedBody: JSON.stringify(agentFixture.connected)
     },
     {
@@ -91,7 +102,7 @@ async function getTestCases () {
       path: '/api/agents/yyy-yyy-yyy',
       statusCode: 200,
       contentType: /json/,
-      token,
+      token: tokenWithAgentsReadPermissions,
       expectedBody: JSON.stringify(agentFixture.single)
     },
     {
@@ -99,7 +110,7 @@ async function getTestCases () {
       path: '/api/metrics/yyy-yyy-yyy',
       statusCode: 200,
       contentType: /json/,
-      token,
+      token: tokenWithMetricsPermissions,
       expectedBody: JSON.stringify({ metrics: metricFixture.getByUuid(1) })
     },
     {
@@ -107,7 +118,7 @@ async function getTestCases () {
       path: '/api/metrics/yyy-yyy-yyy/a',
       statusCode: 200,
       contentType: /json/,
-      token,
+      token: tokenWithMetricsPermissions,
       expectedBody: JSON.stringify({ metrics: metricFixture.getByTypeAgentId('a', 1) })
     },
     {
@@ -115,7 +126,7 @@ async function getTestCases () {
       path: `/api/agents/${wrongUuid}`,
       statusCode: 404,
       contentType: /json/,
-      token,
+      token: tokenWithAgentsReadPermissions,
       expectedBody: JSON.stringify({ error: `Agent with uuid ${wrongUuid} not found` })
     },
     {
@@ -123,7 +134,7 @@ async function getTestCases () {
       path: `/api/metrics/${wrongUuid}`,
       statusCode: 404,
       contentType: /json/,
-      token,
+      token: tokenWithMetricsPermissions,
       expectedBody: JSON.stringify({ error: `Metrics of Agent with uuid ${wrongUuid} not found` })
     },
     {
@@ -131,7 +142,7 @@ async function getTestCases () {
       path: `/api/metrics/${wrongUuid}/${wrongType}`,
       statusCode: 404,
       contentType: /json/,
-      token,
+      token: tokenWithMetricsPermissions,
       expectedBody: JSON.stringify({ error: `Metrics of Agent with uuid ${wrongUuid} and type ${wrongType} not found` })
     },
     {
@@ -145,10 +156,10 @@ async function getTestCases () {
     {
       text: '/api/agents - not authorized without username',
       path: '/api/agents',
-      statusCode: 401,
+      statusCode: 403,
       contentType: /json/,
       token: tokenWithoutUsername,
-      expectedBody: JSON.stringify({ error: 'This user is not authorized to access the requested content' })
+      expectedBody: JSON.stringify({ error: 'Could not find permissions for user. Bad configuration?' })
     },
     {
       text: '/api/agents/:uuid - not authorized',
@@ -173,6 +184,38 @@ async function getTestCases () {
       contentType: /json/,
       token: '',
       expectedBody: JSON.stringify(notAuthorizedBodyError)
+    },
+    {
+      text: '/api/agents - Forbidden',
+      path: '/api/agents',
+      statusCode: 403,
+      contentType: /json/,
+      token: tokenWithoutPermissions,
+      expectedBody: JSON.stringify(forbiddenBodyError)
+    },
+    {
+      text: '/api/agents/:uuid - Forbidden',
+      path: '/api/agents/yyy-yyy-yyy',
+      statusCode: 403,
+      contentType: /json/,
+      token: tokenWithoutPermissions,
+      expectedBody: JSON.stringify(forbiddenBodyError)
+    },
+    {
+      text: '/api/metrics/:uuid - Forbidden',
+      path: '/api/metrics/yyy-yyy-yyy',
+      statusCode: 403,
+      contentType: /json/,
+      token: tokenWithoutPermissions,
+      expectedBody: JSON.stringify(forbiddenBodyError)
+    },
+    {
+      text: '/api/metrics/:uuid/:type - Forbidden',
+      path: '/api/metrics/yyy-yyy-yyy/a',
+      statusCode: 403,
+      contentType: /json/,
+      token: tokenWithoutPermissions,
+      expectedBody: JSON.stringify(forbiddenBodyError)
     }
   ]
 }
