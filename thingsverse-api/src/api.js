@@ -9,7 +9,7 @@ const guard = require('express-jwt-permissions')()
 
 const config = require('./config')
 
-const { AgentNotFoundError, MetricsNotFoundError, NotAuthenticatedError, NotAuthorizedError } = require('./errors')
+const { AgentNotFoundError, MetricsNotFoundError, NotAuthorizedError } = require('./errors')
 
 const api = asyncify(express.Router())
 let services
