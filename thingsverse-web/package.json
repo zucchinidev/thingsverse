@@ -26,13 +26,17 @@
     "nyc": "^11.3.0",
     "proxyquire": "^1.8.0",
     "sinon": "^4.1.2",
-    "standard": "^10.0.3"
+    "standard": "^10.0.3",
+    "supertest": "^3.0.0"
   },
   "dependencies": {
     "chalk": "^2.3.0",
     "debug": "^3.1.0",
     "express": "^4.16.2",
-    "thingsverse-agent": "file:../thingsverse-agent",
-    "socket.io": "^2.0.4"
+    "express-asyncify": "^1.0.0",
+    "request": "^2.83.0",
+    "request-promise-native": "^1.0.5",
+    "socket.io": "^2.0.4",
+    "thingsverse-agent": "file:../thingsverse-agent"
   }
 }
