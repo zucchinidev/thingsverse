@@ -79,7 +79,7 @@
 
       startRealTime () {
         this.socket.on('agent/disconnected', payload => {
-          if (payload.agent.uuid === this.uuid) {
+          if (payload.agent && payload.agent.uuid === this.uuid) {
             this.connected = false
           }
         })
