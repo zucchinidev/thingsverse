@@ -48,7 +48,7 @@
         try {
           const options = {
             method: 'GET',
-            url: `${serverHost}/agent/${this.uuid}`,
+            url: `${serverHost}/agents/${this.uuid}`,
             json: true
           }
           const agent = await request(options)
@@ -69,7 +69,8 @@
             url: `${serverHost}/metrics/${this.uuid}`,
             json: true
           }
-          this.metrics = await request(options)
+          const { metrics } = await request(options)
+          this.metrics = metrics
           this.startRealTime()
         } catch (e) {
           this.error = e.error.error
