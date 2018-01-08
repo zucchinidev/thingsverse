@@ -62,9 +62,11 @@ class Mqtt {
     debug(`Agent: ${agent.uuid} saved`)
     if (!this.agents.get(publisher.id)) {
       this.agents.set(publisher.id, agent)
+      const topic = Mqtt.topics().connectedAgent
+      const payload = JSON.stringify(agent)
       this.mqttModule.publish({
-        topic: Mqtt.topics().connectedAgent,
-        payload: JSON.stringify(agent)
+        topic,
+        payload
       })
     }
   }
