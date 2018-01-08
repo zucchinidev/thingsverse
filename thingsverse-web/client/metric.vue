@@ -52,19 +52,12 @@
           const data = []
           if (Array.isArray(metrics)) {
             metrics.forEach(m => {
-              labels.push(moment(m.createdAt).format('HH:mm:ss'))
+              labels.push(this.formatMetricDate(m))
               data.push(m.value)
             })
           }
 
-          this.datacollection = {
-            labels,
-            datasets: [{
-              backgroundColor: this.color,
-              label: type,
-              data
-            }]
-          }
+          this.setDataCollection(labels, data)
 
           this.startRealTime()
         } catch (e) {
@@ -74,37 +67,39 @@
 
       startRealTime () {
         const { type, uuid, socket } = this
-
+        const limitElements = 20
         socket.on('agent/message', payload => {
           if (payload.agent.uuid === uuid) {
             const metric = payload.metrics.find(m => m.type === type)
 
             // Copy current values
-            const labels = this.datacollection.labels
-            const data = this.datacollection.datasets[0].data
-
-            // Remove first element if length > 20
+            const { labels, datasets: [{ data }] } = this.datacollection
             const length = labels.length || data.length
-
-            if (length >= 20) {
+            const tooManyElements = length >= limitElements
+            if (tooManyElements) {
               labels.shift()
               data.shift()
             }
-
-            // Add new elements
-            labels.push(moment(metric.createdAt).format('HH:mm:ss'))
+            labels.push(this.formatMetricDate(metric))
             data.push(metric.value)
-
-            this.datacollection = {
-              labels,
-              datasets: [{
-                backgroundColor: this.color,
-                label: type,
-                data
-              }]
-            }
+            this.setDataCollection(labels, data)
           }
         })
+      },
+
+      setDataCollection (labels, data) {
+        this.datacollection = {
+          labels,
+          datasets: [{
+            backgroundColor: this.color,
+            label: this.type,
+            data
+          }]
+        }
+      },
+
+      formatMetricDate (metric) {
+        return moment(metric.createdAt).format('HH:mm:ss')
       },
 
       handleError (err) {
