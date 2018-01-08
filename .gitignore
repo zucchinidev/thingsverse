@@ -17,3 +17,4 @@ thingsverse-api/.nyc_output
 thingsverse-web/node_modules
 thingsverse-web/coverage
 thingsverse-web/.nyc_output
+thingsverse-web/public/bundle.js
