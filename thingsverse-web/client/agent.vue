@@ -69,8 +69,8 @@
             url: `${serverHost}/metrics/${this.uuid}`,
             json: true
           }
-          const { metrics } = await request(options)
-          this.metrics = metrics
+          const agentMetrics = await request(options)
+          this.metrics = agentMetrics.metrics || []
           this.startRealTime()
         } catch (e) {
           this.error = e.error.error
