@@ -1,13 +1,14 @@
 'use strict'
 
-function pipe (source, target) {
-  if (!source.emit || !target.emit) {
+function pipe (agent, socket) {
+  if (!agent.emit || !socket.emit) {
     throw new TypeError(`Please pass EventEmmitter's as arguments`)
   }
-  const emit = source._emit = source.emit
-  source.emit = function () {
-    emit.apply(source, arguments)
-    target.emit.apply(target, arguments)
+  const emit = agent._emit = agent.emit
+  agent.emit = function () {
+    emit.apply(agent, arguments)
+    socket.emit.apply(socket, arguments)
+    return agent
   }
 }
 
