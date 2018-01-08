@@ -40,19 +40,18 @@
     methods: {
       async initialize () {
         try {
-          const { uuid, type, color } = this
+          const { uuid, type } = this
           this.color = randomColor.getColor()
           const options = {
             method: 'GET',
             url: `${serverHost}/metrics/${uuid}/${type}`,
             json: true
           }
-          const result = await request(options)
+          const { metrics } = await request(options)
           const labels = []
           const data = []
-
-          if (Array.isArray(result)) {
-            result.forEach(m => {
+          if (Array.isArray(metrics)) {
+            metrics.forEach(m => {
               labels.push(moment(m.createdAt).format('HH:mm:ss'))
               data.push(m.value)
             })
@@ -61,7 +60,7 @@
           this.datacollection = {
             labels,
             datasets: [{
-              backgroundColor: color,
+              backgroundColor: this.color,
               label: type,
               data
             }]

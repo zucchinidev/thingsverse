@@ -264,7 +264,7 @@ module.exports = {
 if (module.exports.__esModule) module.exports = module.exports.default
 var __vue__options__ = (typeof module.exports === "function"? module.exports.options: module.exports)
 if (__vue__options__.functional) {console.error("[vueify] functional components are not supported and should be defined in plain js files using render functions.")}
-__vue__options__.render = function render () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_vm._l((_vm.agents),function(agent){return _c('agent',{key:agent.uuid,attrs:{"uuid":agent.uuid,"socket":_vm.socket}})}),_vm._v(" "),(_vm.error)?_c('p',[_vm._v(_vm._s(_vm.error))]):_vm._e()],2)}
+__vue__options__.render = function render () {var _vm=this;var _h=_vm.$createElement;var _c=_vm._self._c||_h;return _c('div',[_c('metric',{attrs:{"uuid":"88ea183e-baff-4281-8b90-e5d54a9faf17","type":"promiseMetric","socket":_vm.socket}}),_vm._v(" "),(_vm.error)?_c('p',[_vm._v(_vm._s(_vm.error))]):_vm._e()],1)}
 __vue__options__.staticRenderFns = []
 if (module.hot) {(function () {  var hotAPI = require("vue-hot-reload-api")
   hotAPI.install(require("vue"), true)
@@ -345,13 +345,14 @@ module.exports = {
       var _this = this;
 
       return (0, _asyncToGenerator3.default)(_regenerator2.default.mark(function _callee() {
-        var uuid, type, color, options, result, labels, data;
+        var uuid, type, options, _ref, metrics, labels, data;
+
         return _regenerator2.default.wrap(function _callee$(_context) {
           while (1) {
             switch (_context.prev = _context.next) {
               case 0:
                 _context.prev = 0;
-                uuid = _this.uuid, type = _this.type, color = _this.color;
+                uuid = _this.uuid, type = _this.type;
 
                 _this.color = randomColor.getColor();
                 options = {
@@ -363,46 +364,48 @@ module.exports = {
                 return request(options);
 
               case 6:
-                result = _context.sent;
+                _ref = _context.sent;
+                metrics = _ref.metrics;
                 labels = [];
                 data = [];
 
-
-                if (Array.isArray(result)) {
-                  result.forEach(function (m) {
+                if (Array.isArray(metrics)) {
+                  metrics.forEach(function (m) {
                     labels.push(moment(m.createdAt).format('HH:mm:ss'));
                     data.push(m.value);
                   });
                 }
+                console.log(data);
+                console.log(labels);
 
                 _this.datacollection = {
                   labels: labels,
                   datasets: [{
-                    backgroundColor: color,
+                    backgroundColor: _this.color,
                     label: type,
                     data: data
                   }]
                 };
 
-                _this.startRealtime();
-                _context.next = 17;
+                _this.startRealTime();
+                _context.next = 20;
                 break;
 
-              case 14:
-                _context.prev = 14;
+              case 17:
+                _context.prev = 17;
                 _context.t0 = _context['catch'](0);
 
                 _this.error = _context.t0.error.error;
 
-              case 17:
+              case 20:
               case 'end':
                 return _context.stop();
             }
           }
-        }, _callee, _this, [[0, 14]]);
+        }, _callee, _this, [[0, 17]]);
       }))();
     },
-    startRealtime: function startRealtime() {
+    startRealTime: function startRealTime() {
       var _this2 = this;
 
       var type = this.type,
