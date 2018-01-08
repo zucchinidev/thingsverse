@@ -67,13 +67,13 @@
             }]
           }
 
-          this.startRealtime()
+          this.startRealTime()
         } catch (e) {
           this.error = e.error.error
         }
       },
 
-      startRealtime () {
+      startRealTime () {
         const { type, uuid, socket } = this
 
         socket.on('agent/message', payload => {
