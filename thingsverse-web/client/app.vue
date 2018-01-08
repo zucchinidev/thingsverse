@@ -40,18 +40,18 @@
 
         try {
           this.agents = await request(options)
+          socket.on('agent/connected', payload => {
+            const agent = payload.agent
+            if (agent && agent.uuid) {
+              const existing = this.agents.find(a => a.uuid === agent.uuid)
+              if (!existing) {
+                this.agents.push(agent)
+              }
+            }
+          })
         } catch (e) {
           this.error = e.error.error
-          return
         }
-
-        socket.on('agent/connected', payload => {
-          const { uuid } = payload.agent
-          const existing = this.agents.find(a => a.uuid === uuid)
-          if (!existing) {
-            this.agents.push(payload.agent)
-          }
-        })
       }
     }
   }
