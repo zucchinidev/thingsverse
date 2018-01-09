@@ -38,6 +38,7 @@
     "sinon": "^4.1.2",
     "standard": "^10.0.3",
     "supertest": "^3.0.0",
+    "uglify-js": "^3.3.5",
     "vueify": "^9.4.1"
   },
   "dependencies": {
