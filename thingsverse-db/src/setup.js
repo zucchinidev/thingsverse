@@ -3,7 +3,7 @@ const debug = require('debug')('thingsverse:db:setup')
 const inquirer = require('inquirer')
 const chalk = require('chalk')
 
-const db = require('./')
+const { db } = require('./')
 const prompt = inquirer.createPromptModule()
 
 /**
