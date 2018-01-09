@@ -1,5 +1,8 @@
 'use strict'
-
+if (process.env.NODE_ENV !== 'production') {
+  // expand the stacktrace only in development
+  require('longjohn')
+}
 const defaults = require('defaults')
 const setupDatabase = require('./lib/db')
 const setupAgentModel = require('./models/agent')
