@@ -1,0 +1,12 @@
+postgresql_databases:
+  - name: thingsverse
+    owner: thingsverse
+    hstore: yes         # flag to install the hstore extension on this database (yes/no)
+postgresql_users:
+  - name: thingsverse
+    pass: thingsverse
+    encrypted: no       # denotes if the password is already encrypted.
+postgresql_user_privileges:
+  - name: thingsverse                   # user name
+    db: thingsverse                  # database
+    priv: "ALL"                 # privilege string format: example: INSERT,UPDATE/table:SELECT/anothertable:ALL
