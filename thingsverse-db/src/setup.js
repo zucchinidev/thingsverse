@@ -2,16 +2,17 @@
 const debug = require('debug')('thingsverse:db:setup')
 const inquirer = require('inquirer')
 const chalk = require('chalk')
-
+const miniminst = require('minimist')
 const { db } = require('./')
 const prompt = inquirer.createPromptModule()
 
 /**
- * Setup database: node setup.js -- -y
+ * Setup database: node setup.js -- --yes
  */
 async function setup () {
-  const forceDestroy = process.argv.slice(2).pop()
-  if (forceDestroy !== '-y') {
+  const args = miniminst(process.argv)
+  const forceDestroy = args.yes
+  if (!forceDestroy) {
     const answer = await prompt([
       {
         type: 'confirm',
