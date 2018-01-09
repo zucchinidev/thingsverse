@@ -18,3 +18,6 @@ thingsverse-web/node_modules
 thingsverse-web/coverage
 thingsverse-web/.nyc_output
 thingsverse-web/public/bundle.js
+thingsverse-cli/coverage
+thingsverse-cli/.nyc_output
+thingsverse-cli/node_modules
