@@ -1,0 +1,30 @@
+---
+- include: deps.yml
+- name: Copy thingsverse-mqtt
+  copy:
+    src=thingsverse-mqtt
+    dest=/usr/local/src
+    mode=u=rwx,g=rwx,o=rx
+- name: Copy thingsverse-payload-parser
+  copy:
+    src=thingsverse-payload-parser
+    dest=/usr/local/src
+    mode=u=rwx,g=rwx,o=rx
+- name: Run npm install
+  command: npm install
+    chdir=/usr/local/src/thingsverse-mqtt
+    creates=/usr/local/src/thingsverse-mqtt/node_modules
+- name: Install local modules
+  command: npm install --save ../thingsverse-payload-parser ../thingsverse-db
+    chdir=/usr/local/src/thingsverse-mqtt
+    creates=/usr/local/src/thingsverse-mqtt/node_modules/thingsverse-payload-parser
+    creates=/usr/local/src/thingsverse-mqtt/node_modules/thingsverse-db
+- name: Install systemd script
+  copy:
+    src=thingsverse-mqtt.service
+    dest=/lib/systemd/system
+- name: Start thingsverse-mqtt Service
+  service:
+    name=thingsverse-mqtt
+    state=restarted
+    enabled=yes
