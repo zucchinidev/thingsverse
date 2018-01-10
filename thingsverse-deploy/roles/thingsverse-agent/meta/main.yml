@@ -1,5 +1,3 @@
 ---
 dependencies:
   - { role: node }
-  - { role: jdauphant.nginx }
-  - { role: thingsverse-db }
