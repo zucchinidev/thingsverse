@@ -2,4 +2,4 @@
 dependencies:
   - { role: node }
   - { role: jdauphant.nginx }
-  - { role: thingsverse-db }
+  - { role: thingsverse-agent }

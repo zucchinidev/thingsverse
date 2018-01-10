@@ -1,25 +1,25 @@
 ---
 - include: deps.yml
-- name: Copying thingsverse-api
+- name: Copying thingsverse-web
   copy:
-    src=thingsverse-api
+    src=thingsverse-web
     dest=/usr/local/src
     mode=u=rwx,g=rwx,o=rx
 - name: Running npm install
   command: npm install
-    chdir=/usr/local/src/thingsverse-api
-    creates=/usr/local/src/thingsverse-api/node_modules
+    chdir=/usr/local/src/thingsverse-web
+    creates=/usr/local/src/thingsverse-web/node_modules
 - name: Install systemd script
   copy:
-    src=thingsverse-api.service
+    src=thingsverse-web.service
     dest=/lib/systemd/system
 - name: Install nginx config
   copy:
-    src=thingsverse-api.conf
+    src=thingsverse-web.conf
     dest=/etc/nginx/sites-enabled
-- name: Start thingsverse-api
+- name: Start thingsverse-web
   service:
-    name=thingsverse-api
+    name=thingsverse-web
     state=restarted
     enabled=yes
 - name: Restart nginx
