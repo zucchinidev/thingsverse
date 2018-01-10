@@ -18,6 +18,7 @@ ansible-galaxy install geerlingguy.redis
 
 ansible-galaxy install jdauphant.nginx
 
+vagrant up
 
 vagrant ssh
 
@@ -29,8 +30,12 @@ cat ssh/deploy.pub | sudo tee -a authorized_keys
 
 exit
 
-exit
-
 ssh root@127.0.0.1 -p 2222 -i ssh/deploy
 
 ```
+
+## Install playbook
+```sh
+ansible-playbook -i inventory.ini backend.yml --private-key ssh/deploy
+```
+
