@@ -8,3 +8,4 @@
   roles:
     - database
     - thingsverse-mqtt
+    - thingsverse-api
