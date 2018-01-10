@@ -1,0 +1,9 @@
+---
+- hosts: frontend-*
+  gather_facts: False
+  pre_tasks:
+    - name: Install Python 2
+      raw: test -e /usr/bin/python || (rm -rf /var/lib/apt/lists/lock && apt-get update -y && apt-get install -y python-minimal)
+    - setup:
+  roles:
+    - thingsverse-web
