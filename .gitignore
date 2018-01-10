@@ -21,3 +21,5 @@ thingsverse-web/public/bundle.js
 thingsverse-cli/coverage
 thingsverse-cli/.nyc_output
 thingsverse-cli/node_modules
+thingsverse-deploy/.vagrant/*
+thingsverse-deploy/ubuntu-xenial-16.04-cloudimg-console.log
