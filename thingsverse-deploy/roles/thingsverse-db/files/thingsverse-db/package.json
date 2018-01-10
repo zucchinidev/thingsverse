@@ -1,0 +1,41 @@
+{
+  "name": "thingsverse-db",
+  "version": "0.0.1",
+  "description": "A simple IoT Platform - DB Module",
+  "private": true,
+  "main": "src/index.js",
+  "scripts": {
+    "lint": "standard",
+    "setup": "DEBUG=thingsverse:* node src/setup.js",
+    "test": "DEBUG=thingsverse:* nyc --reporter=lcov ava test/ --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zucchinidev/thingsverse.git"
+  },
+  "author": "Andrea Zucchini <azga84@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zucchinidev/thingsverse/issues"
+  },
+  "homepage": "https://github.com/zucchinidev/thingsverse#readme",
+  "devDependencies": {
+    "ava": "^0.23.0",
+    "longjohn": "^0.2.12",
+    "nyc": "^11.4.1",
+    "proxyquire": "^1.8.0",
+    "sinon": "^4.1.3",
+    "standard": "^10.0.3"
+  },
+  "dependencies": {
+    "chalk": "^2.3.0",
+    "debug": "^3.1.0",
+    "defaults": "^1.0.3",
+    "inquirer": "^4.0.1",
+    "minimist": "^1.2.0",
+    "pg": "^7.4.0",
+    "pg-hstore": "^2.3.2",
+    "sequelize": "^4.28.2",
+    "sqlite3": "^3.1.13"
+  }
+}

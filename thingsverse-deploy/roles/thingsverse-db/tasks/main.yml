@@ -1,0 +1,14 @@
+---
+- include: deps.yml
+- name: Copy thingsverse-db
+  copy:
+    src=thingsverse-db
+    dest=/url/local/src
+    mode=u=rwx,g=rwx,o=rx
+- name: Run npm install
+  command: npm install
+    chdir=/url/local/src/thingsverse-db
+    create=/url/local/src/thingsverse-db/node_modules
+- name: Setup Database
+  command: npm run setup -- --yes
+    chdir=/usr/local/src/thingsverse-db
