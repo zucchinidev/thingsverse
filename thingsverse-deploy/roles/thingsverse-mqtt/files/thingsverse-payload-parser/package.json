@@ -1,0 +1,27 @@
+{
+  "name": "thingsverse-payload-parser",
+  "version": "0.0.1",
+  "description": "A Simple IOT Platform - Payload parser",
+  "main": "index.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "NODE_ENV=test nyc --reporter=lcov ava test/ --verbose"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zucchinidev/thingsverse.git"
+  },
+  "author": "Andrea Zucchini <azga84@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/zucchinidev/thingsverse/issues"
+  },
+  "homepage": "https://github.com/zucchinidev/thingsverse#readme",
+  "devDependencies": {
+    "ava": "^0.24.0",
+    "nyc": "^11.3.0"
+  },
+  "dependencies": {}
+}
